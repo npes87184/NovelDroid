@@ -55,5 +55,8 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="illegalName">Illegal file name</string>
+    <string name="oops_illegalOutput_detail">You do not have permission on it.</string>
+    <string name="oops_sdcard_detail">We need external sd card writing permission.</string>
+    <string name="oops">Oops...</string>
 
 </resources>

@@ -128,7 +128,7 @@ public class EynyDownloader extends AbstractDownloader {
 
 		OutputStreamWriter writer = null;
 		try {
-			writer = NovelUtils.newNovelWriter(downDirPath + filename, encoding);
+			writer = NovelUtils.newNovelWriter(downDirPath + filename, encoding, this.context);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

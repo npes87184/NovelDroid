@@ -1,11 +1,18 @@
 package com.sh1r0.noveldroid;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.support.v4.provider.DocumentFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,9 +92,38 @@ public class NovelUtils {
 		return filename;
 	}
 
-	public static OutputStreamWriter newNovelWriter(String filepath, String encoding) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(filepath), encoding);
-		if (encoding.equals("UTF-16LE")) { // inject BOM
+	public static OutputStreamWriter newNovelWriter(String filepath, String encoding, Context context) throws IOException {
+		FileUtils fileUtil = new FileUtils(context);
+		File file = new File(filepath);
+		OutputStreamWriter writer = null;
+		SharedPreferences prefs;
+
+		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && fileUtil.getExtSdCardFolder(file) != null) {
+			// in external sdcard
+			Uri uri;
+			try {
+				uri = Uri.parse(prefs.getString(SettingsFragment.KEY_SDCARD_URI, null));
+			} catch (Exception e) {
+				uri = null;
+			}
+			DocumentFile targetDocument = fileUtil.getDocumentFile(file, uri);
+			try {
+				OutputStream outStream = context.
+						getContentResolver().openOutputStream(targetDocument.getUri());
+				writer = new OutputStreamWriter(outStream, encoding);
+			} catch (Exception e) {
+				writer = null;
+			}
+		} else {
+			try {
+				writer = new OutputStreamWriter(new FileOutputStream(filepath), encoding);
+			} catch (Exception e) {
+				writer = null;
+			}
+		}
+
+		if (writer != null && encoding.equals("UTF-16LE")) { // inject BOM
 			writer.write("\uFEFF");
 		}
 

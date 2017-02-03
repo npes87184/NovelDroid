@@ -80,7 +80,7 @@ public class _17kDownloader extends AbstractDownloader {
 
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				NovelUtils.TEMP_DIR + novel.bookID + ".txt"), "UTF-8"));
-			writer = NovelUtils.newNovelWriter(downDirPath + outputFileName, encoding);
+			writer = NovelUtils.newNovelWriter(downDirPath + outputFileName, encoding, this.context);
 
 			NovelUtils novelUtils = NovelUtils.getInstance();
 			String line;

@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 					if ((novel = novelDownloader.analyze(tid)) == null) {
 						throw new Exception();
 					}
+					novelDownloader.setContext(getApplicationContext());
 				} catch (Exception e) {
 					String err = (e.getMessage() == null) ? "analysis fail" : e.getMessage();
 					Log.e("Error", err);

@@ -1,5 +1,6 @@
 package com.sh1r0.noveldroid;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
@@ -16,6 +17,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
@@ -56,9 +58,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 	private static final String KEY_NAMING_RULE = "naming_rule";
 	private static final String KEY_NAMING_RULE_PREVIEW = "naming_rule_preivew";
 	private static final String KEY_DOWN_DIR = "down_dir";
+	public static final String KEY_SDCARD_URI = "sdcard_uri";
 	private static final String KEY_CHECK_UPDATE = "check_update";
 	private static final String KEY_ABOUT = "about";
 	private static final int FILE_CODE = 0;
+	private static final int REQUEST_CODE_STORAGE_ACCESS = 1;
 
 	private Preference encoding;
 	private Preference namingRule;
@@ -258,10 +262,66 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 	}
 
 	@Override
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == FILE_CODE && resultCode == Activity.RESULT_OK) {
 			Uri uri = data.getData();
+			Uri sdCardUri;
+
+			try {
+				sdCardUri = Uri.parse(prefs.getString(KEY_SDCARD_URI, null));
+			} catch (Exception e) {
+				sdCardUri = null;
+			}
+			File testFile = new File(uri.getPath());
+			FileUtils fileUtils = new FileUtils(this.getContext());
+
+			if (fileUtils.isOnExtSdCard(testFile)) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !fileUtils.isWritableNormalOrSaf(testFile, sdCardUri)) {
+					new AlertDialog.Builder(getActivity())
+							.setTitle(R.string.oops)
+							.setMessage(R.string.oops_sdcard_detail)
+							.setCancelable(false)
+							.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// trigger storage access framework.
+									Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+									startActivityForResult(intent, REQUEST_CODE_STORAGE_ACCESS);
+								}
+							})
+							.show();
+				} else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT && !FileUtils.isWritableNormal(testFile)) {
+					// The android version is kitkat and can not write to it.
+					new AlertDialog.Builder(getActivity())
+							.setTitle(R.string.oops)
+							.setMessage(R.string.oops_illegalOutput_detail)
+							.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// do nothing.
+								}
+							})
+							.show();
+					return;
+				}
+			}
 			downDir.getSharedPreferences().edit().putString(KEY_DOWN_DIR, uri.getPath() + "/").commit();
+		}
+
+		if (requestCode == REQUEST_CODE_STORAGE_ACCESS) {
+			Uri treeUri = null;
+			if (resultCode == Activity.RESULT_OK) {
+				// Get Uri from Storage Access Framework.
+				treeUri = data.getData();
+
+				// Persist URI in shared preference so that you can use it later.
+				prefs.edit().putString(KEY_SDCARD_URI, treeUri.toString()).commit();
+
+				// Persist access permissions.
+				getActivity().getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+						Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+			}
 		}
 	}
 

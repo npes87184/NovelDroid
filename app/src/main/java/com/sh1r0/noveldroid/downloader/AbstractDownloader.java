@@ -1,10 +1,13 @@
 package com.sh1r0.noveldroid.downloader;
 
+import android.content.Context;
 import android.os.Handler;
 
 import com.sh1r0.noveldroid.Novel;
 
 abstract public class AbstractDownloader {
+	public Context context;
+
 	protected static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0";
 	protected static final String[] MOBILE_USER_AGENTS = {
 		"Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19",
@@ -21,4 +24,8 @@ abstract public class AbstractDownloader {
 	public abstract void download(Handler progressHandler) throws Exception;
 
 	public abstract String process(String downDirPath, String namingRule, String encoding);
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
 }

@@ -79,7 +79,7 @@ public class QidianDownloader extends AbstractDownloader {
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				NovelUtils.TEMP_DIR + novel.bookID + ".txt"), "GBK"));
-			writer = NovelUtils.newNovelWriter(downDirPath + outputFileName, encoding);
+			writer = NovelUtils.newNovelWriter(downDirPath + outputFileName, encoding, this.context);
 
 			NovelUtils novelUtils = NovelUtils.getInstance();
 			String line;

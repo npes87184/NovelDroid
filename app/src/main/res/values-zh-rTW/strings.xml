@@ -55,5 +55,8 @@
     <string name="novel_saved_tooltip">已完成</string>
     <string name="to_page">終止頁數</string>
     <string name="illegalName">檔名不合適</string>
+    <string name="oops_illegalOutput_detail">無此資料夾的寫入權限</string>
+    <string name="oops_sdcard_detail">需要寫入外部 SD 卡的權限</string>
+    <string name="oops">Oops...</string>
 
 </resources>
